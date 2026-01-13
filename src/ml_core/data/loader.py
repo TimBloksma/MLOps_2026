@@ -1,30 +1,61 @@
-from pathlib import Path
-from typing import Dict, Tuple
+from __future__ import annotations
 
-from torch.utils.data import DataLoader
-from torchvision import transforms
+from pathlib import Path
+from typing import Tuple
+
+import h5py
+import numpy as np
+import torch
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from .pcam import PCAMDataset
 
 
-def get_dataloaders(config: Dict) -> Tuple[DataLoader, DataLoader]:
-    """
-    Factory function to create Train and Validation DataLoaders
-    using pre-split H5 files.
-    """
-    data_cfg = config["data"]
-    base_path = Path(data_cfg["data_path"])
+def _read_labels(y_path: Path) -> np.ndarray:
+    with h5py.File(y_path, "r") as f:
+        yds = f["y"] if "y" in f else list(f.values())[0]
+        return np.array(yds[:]).reshape(-1).astype(int)
 
-    # TODO: Define Transforms
-    # train_transform = ...
-    # val_transform = ...
 
-    # TODO: Define Paths for X and Y (train and val)
-    
-    # TODO: Instantiate PCAMDataset for train and val
+def get_dataloaders(config: dict) -> Tuple[DataLoader, DataLoader]:
+    data_cfg = config.get("data", {})
+    data_dir = Path(data_cfg["data_path"])
+    batch_size = int(data_cfg.get("batch_size", 64))
+    num_workers = int(data_cfg.get("num_workers", 0))
 
-    # TODO: Create DataLoaders
-    # train_loader = ...
-    # val_loader = ...
-    
-    raise NotImplementedError("Implement get_dataloaders")
+    train_x = data_dir / "camelyonpatch_level_2_split_train_x.h5"
+    train_y = data_dir / "camelyonpatch_level_2_split_train_y.h5"
+    valid_x = data_dir / "camelyonpatch_level_2_split_valid_x.h5"
+    valid_y = data_dir / "camelyonpatch_level_2_split_valid_y.h5"
+
+    train_ds = PCAMDataset(str(train_x), str(train_y), filter_data=False)
+    valid_ds = PCAMDataset(str(valid_x), str(valid_y), filter_data=False)
+
+    # WeightedRandomSampler to counter class imbalance
+    y = _read_labels(train_y)
+    class_counts = np.bincount(y, minlength=2)
+    class_weights = 1.0 / np.maximum(class_counts, 1)
+    sample_weights = class_weights[y]
+
+    sampler = WeightedRandomSampler(
+        weights=torch.as_tensor(sample_weights, dtype=torch.double),
+        num_samples=len(sample_weights),
+        replacement=True,
+    )
+
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=batch_size,
+        sampler=sampler,
+        num_workers=num_workers,
+        pin_memory=False,
+    )
+    valid_loader = DataLoader(
+        valid_ds,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=False,
+    )
+
+    return train_loader, valid_loader

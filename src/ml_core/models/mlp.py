@@ -1,25 +1,37 @@
-from typing import List
+from __future__ import annotations
+
+from typing import List, Sequence
 
 import torch
 import torch.nn as nn
 
 
 class MLP(nn.Module):
+    """
+    Minimal MLP that:
+    - flattens (B, C, H, W) -> (B, C*H*W)
+    - outputs logits of shape (B, num_classes)
+    """
+
     def __init__(
         self,
-        input_shape: List[int],
+        input_shape: Sequence[int],
         hidden_units: List[int],
-        num_classes: int = 2,
-        dropout_rate: float = 0.2,
+        num_classes: int,
     ):
         super().__init__()
-        
-        # TODO: Build the MLP architecture
-        # If you are up to the task, explore other architectures or model types
-        # Hint: Flatten -> [Linear -> ReLU -> Dropout] * N_layers -> Linear
-        
-        pass
+        in_features = int(input_shape[0] * input_shape[1] * input_shape[2])
+
+        layers: List[nn.Module] = []
+        prev = in_features
+        for h in hidden_units:
+            layers.append(nn.Linear(prev, int(h)))
+            layers.append(nn.ReLU())
+            prev = int(h)
+        layers.append(nn.Linear(prev, int(num_classes)))
+
+        self.net = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # TODO: Implement forward pass
-        pass
+        x = x.view(x.size(0), -1)
+        return self.net(x)

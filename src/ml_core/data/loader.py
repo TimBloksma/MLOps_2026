@@ -31,7 +31,6 @@ def get_dataloaders(config: dict) -> Tuple[DataLoader, DataLoader]:
     train_ds = PCAMDataset(str(train_x), str(train_y), filter_data=False)
     valid_ds = PCAMDataset(str(valid_x), str(valid_y), filter_data=False)
 
-    # WeightedRandomSampler to counter class imbalance
     y = _read_labels(train_y)
     class_counts = np.bincount(y, minlength=2)
     class_weights = 1.0 / np.maximum(class_counts, 1)

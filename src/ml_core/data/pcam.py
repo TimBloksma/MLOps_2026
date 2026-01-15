@@ -11,10 +11,11 @@ class PCAMDataset(Dataset):
     """
     PatchCamelyon (PCAM) Dataset reader for H5 format.
 
-    Requirements from tests:
+    Test requirements:
     - supports filter_data=True/False (mean-based heuristic filtering)
     - clips values BEFORE converting to uint8 (numerical stability)
     - lazy H5 loading (open on first __getitem__)
+    - exposes ds.indices (len(ds.indices) used in tests)
     """
 
     def __init__(
@@ -43,10 +44,10 @@ class PCAMDataset(Dataset):
         self._x_ds = None
         self._y_ds = None
 
-        # Determine base length and (optionally) filtered indices without keeping files open
+        # Determine length / indices without keeping file open
         with h5py.File(self.x_path, "r") as fx:
             xds = fx["x"] if "x" in fx else list(fx.values())[0]
-            n = xds.shape[0]
+            n = int(xds.shape[0])
 
             if self.filter_data:
                 means = xds[:].mean(axis=(1, 2, 3))
@@ -57,8 +58,7 @@ class PCAMDataset(Dataset):
                 self._indices = None
                 self.indices = np.arange(n, dtype=np.int64)
 
-
-        self.length = int(len(self._indices)) if self._indices is not None else int(n)
+        self.length = int(len(self.indices))
 
     def __len__(self) -> int:
         return self.length
@@ -78,15 +78,12 @@ class PCAMDataset(Dataset):
         real_idx = int(self._indices[idx]) if self._indices is not None else int(idx)
 
         x = self._x_ds[real_idx]
-
-        # IMPORTANT: clip BEFORE uint8 conversion (prevents wrap-around)
         x = np.clip(x, self.clip_min, self.clip_max).astype(np.uint8)
 
         # (H, W, C) -> (C, H, W)
         if x.ndim == 3:
             x = np.transpose(x, (2, 0, 1))
 
-        # normalize to float32 [0,1] (common + test-friendly)
         x = (x.astype(np.float32) / 255.0)
         x_t = torch.from_numpy(x)
 
@@ -108,4 +105,3 @@ class PCAMDataset(Dataset):
         state["_x_ds"] = None
         state["_y_ds"] = None
         return state
-

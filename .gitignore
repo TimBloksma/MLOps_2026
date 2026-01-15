@@ -1,7 +1,8 @@
+venv/
+logs/
+eda_outputs/
+experiments/*.png
+experiments/*.csv
 __pycache__/
 *.pyc
-experiments/logs/
-experiments/results/
-.env
-.DS_Store
-*.egg-info/
+

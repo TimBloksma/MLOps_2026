@@ -1,8 +1,1 @@
-venv/
-logs/
-eda_outputs/
-experiments/*.png
-experiments/*.csv
-__pycache__/
-*.pyc
-
+src/ml_core/data/pcam/

@@ -4,7 +4,7 @@ seed: 42
 data:
   dataset_type: "pcam"
   # TODO: download the dataset and set the relative path here
-  data_path: "./data/camelyonpatch_level_2" 
+  data_path: "./src/ml_core/data/pcam/camelyonpatch_level_2" 
   input_shape: [3, 96, 96]
   batch_size: 32
   num_workers: 2

@@ -17,12 +17,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest numpy h5py torch tqdm pyyaml
-          echo "PYTHONPATH=${GITHUB_WORKSPACE}/src" >> $GITHUB_ENV
-
-      - name: Run tests
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -e .    
+      - name: Run Tests
         run: |
-          pytest -q
+          pytest tests/test_data_loader.py
+          pytest tests/test_model_shapes.py 

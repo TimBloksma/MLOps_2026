@@ -32,7 +32,7 @@ def main(cfg: DictConfig):
     optimizer = optim.Adam(model.parameters(), lr=cfg.lr)
     criterion = nn.CrossEntropyLoss()
 
-    wandb.watch(model, criterion, log="all")
+    # wandb.watch(model, criterion, log="all")
 
     train_losses, val_losses = [], []
     train_loss_step, val_loss_step = [], []
@@ -73,11 +73,13 @@ def main(cfg: DictConfig):
         avg_val_loss = epoch_val_loss / len(val_loader)
         val_losses.append(avg_val_loss)
 
+        """
         wandb.log({
             "train/loss_epoch": avg_train_loss,
             "val/loss_epoch": avg_val_loss,
             "epoch": epoch + 1,
         })
+        """
 
         print(f"--- Epoch {epoch+1} Summary | Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f} ---")
 
@@ -91,7 +93,7 @@ def main(cfg: DictConfig):
     plt.legend()
     plt.grid(True)
     plt.savefig("resultaten.png")
-    wandb.log({"loss_curve": wandb.Image("resultaten.png")})
+    #wandb.log({"loss_curve": wandb.Image("resultaten.png")})
 
     plt.figure(figsize=(12, 6))
     plt.plot(train_loss_step, label="Train Loss (step)", alpha=0.7)
@@ -103,10 +105,10 @@ def main(cfg: DictConfig):
     plt.legend()
     plt.grid(True)
     plt.savefig("loss_per_step.png")
-    wandb.log({"loss_per_step": wandb.Image("loss_per_step.png")})
+    #wandb.log({"loss_per_step": wandb.Image("loss_per_step.png")})
 
     print("Training complete. Plot saved as resultaten.png and loss_per_step.png")
-    wandb.finish()
+    #wandb.finish()
 
 
 if __name__ == "__main__":

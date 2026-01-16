@@ -1,1 +1,3 @@
 src/ml_core/data/pcam/
+outputs/
+wandb/

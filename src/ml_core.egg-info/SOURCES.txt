@@ -2,7 +2,6 @@ LICENSE
 README.md
 pyproject.toml
 src/ml_core/__init__.py
-src/ml_core/train.py
 src/ml_core.egg-info/PKG-INFO
 src/ml_core.egg-info/SOURCES.txt
 src/ml_core.egg-info/dependency_links.txt

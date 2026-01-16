@@ -49,6 +49,6 @@ class PCAMDataset(Dataset):
             img = self.transform(img)
         else:
             # Basic conversion if no transform provided
-            img = torch.from_numpy(img).permute(2, 0, 1).float()
+            img = torch.from_numpy(img).permute(2, 0, 1).float() / 255.0
 
         return img, torch.tensor(label, dtype=torch.long)

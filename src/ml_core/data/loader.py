@@ -10,15 +10,7 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from .pcam import PCAMDataset
 
-dir = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "configs")
-)
 
-@hydra.main(
-    version_base=None,
-    config_path=dir,
-    config_name="config"
-)
 def _read_labels(y_path: Path) -> np.ndarray:
     with h5py.File(y_path, "r") as f:
         yds = f["y"] if "y" in f else list(f.values())[0]
@@ -26,9 +18,14 @@ def _read_labels(y_path: Path) -> np.ndarray:
 
 
 def get_dataloaders(data_cfg: DictConfig) -> Tuple[DataLoader, DataLoader]:
-    data_dir = Path(data_cfg.data.data_path)
-    batch_size = int(data_cfg.data.batch_size)
-    num_workers = int(data_cfg.data.num_workers)
+    if data_cfg is None:
+        data_dir = Path("./src/ml_core/data/pcam")
+        batch_size = 2
+        num_workers = 0
+    else:
+        data_dir = Path(data_cfg.data.data_path)
+        batch_size = int(data_cfg.data.batch_size)
+        num_workers = int(data_cfg.data.num_workers)
 
     train_x = data_dir / "camelyonpatch_level_2_split_train_x.h5"
     train_y = data_dir / "camelyonpatch_level_2_split_train_y.h5"

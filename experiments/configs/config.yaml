@@ -2,6 +2,4 @@ defaults:
   - _self_
   - data: default
   - model: default
-
-epochs: 3
-lr: 0.01
+  - training: default

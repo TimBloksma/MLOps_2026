@@ -18,9 +18,9 @@ def _read_labels(y_path: Path) -> np.ndarray:
 
 
 def get_dataloaders(data_cfg: DictConfig) -> Tuple[DataLoader, DataLoader]:
-    data_dir = Path(data_cfg.data_path)
-    batch_size = int(data_cfg.batch_size)
-    num_workers = int(data_cfg.num_workers)
+    data_dir = Path(data_cfg.data.data_path)
+    batch_size = int(data_cfg.data.batch_size)
+    num_workers = int(data_cfg.data.num_workers)
 
     train_x = data_dir / "camelyonpatch_level_2_split_train_x.h5"
     train_y = data_dir / "camelyonpatch_level_2_split_train_y.h5"

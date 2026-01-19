@@ -10,7 +10,14 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from .pcam import PCAMDataset
 
-
+dir = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "configs")
+)
+@hydra.main(
+    version_base=None,
+    config_path=dir),
+    config_name="config"
+)
 def _read_labels(y_path: Path) -> np.ndarray:
     with h5py.File(y_path, "r") as f:
         yds = f["y"] if "y" in f else list(f.values())[0]

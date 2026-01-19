@@ -13,9 +13,10 @@ from .pcam import PCAMDataset
 dir = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "configs")
 )
+
 @hydra.main(
     version_base=None,
-    config_path=dir),
+    config_path=dir,
     config_name="config"
 )
 def _read_labels(y_path: Path) -> np.ndarray:

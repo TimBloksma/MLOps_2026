@@ -11,6 +11,19 @@ This project implements a standardized workflow for training neural networks on 
 The idea is that you fill in the repository with the necessary functions so you can execute the ```train.py``` function. Please also fill in this ```README.md``` clearly to setup, install and run your code. 
 
 Don't forget to setup CI and linting!
+---
+# PCAM Histopathology Classification - Group 17
+
+**Group Members:** [Lars van der Groep, Berend Veltkamp, Tim Bloksma, Julius Rademakers en Mingus Gaston]
+**Student IDs:** [ , , , ,15113019]
+**Course:** MLOps & ML Programming 2026, University of Amsterdam
+**Repository:** [https://github.com/TimBloksma/MLOps_2026]
+
+---
+## Overview
+This repository contains a complete MLOps pipeline for binary classification of histopathology images 
+from the PCAM (PatchCamelyon) dataset. The goal is to detect metastatic tissue in 96x96 image patches using deep 
+learning with proper MLOps practices.
 
 ---
 
@@ -40,10 +53,72 @@ pytest tests/
 ```bash
 python experiments/train.py --config experiments/configs/train_config.yaml
 ```
+---
+## Data setup
+
+### 1. Download the PCAM dataset from SURFDrive and place the H5 files in the data/ directory:
+
+data/
+├── camelyonpatch_level_2_split_train_x.h5
+├── camelyonpatch_level_2_split_train_y.h5
+├── camelyonpatch_level_2_split_valid_x.h5
+├── camelyonpatch_level_2_split_valid_y.h5
+├── camelyonpatch_level_2_split_test_x.h5
+└── camelyonpatch_level_2_split_test_y.h5
+
+Note: Due to size constraints, the actual H5 files are not included in this repository.
+
+```bash
+### 2. Verify the setup:
+pytest tests/
+```
+
+```bash
+### 3. Run an experiment:
+python experiments/train.py --config experiments/configs/train_config.yaml
+```
 
 ---
+## Training
 
+```bash
+### To reproduce our best model:
+**python experiments/train.py --config experiments/configs/champion_model.yaml
+```
+
+### Expected Performance:
+ 
+**Validation Accuracy: ~...%**
+
+**Test Accuracy: ~...%**
+
+**AUC-ROC: ~...**
+
+**F1-Score: ~...**
+
+**Precision: ~...**
+
+**Recall: ~...**
+
+### Training Configuration
+```bash
+Hier komt die configuration van champion model :))
+
+```
+
+
+---
+## Inference
+
+
+Weet ik niet, we hebben ook nog geen checkpoints
+
+
+
+---
 ## 📂 Project Structure
+
+Dit staat er nu maar moet morgen worden veranderd naar ons final product.
 
 ```text
 .

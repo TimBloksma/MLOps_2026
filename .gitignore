@@ -1,1 +1,6 @@
 src/ml_core/data/pcam/
+#Python 
+__pychache__/
+*.pyc
+#Virtual env
+venv/

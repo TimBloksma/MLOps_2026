@@ -18,9 +18,14 @@ def _read_labels(y_path: Path) -> np.ndarray:
 
 
 def get_dataloaders(data_cfg: DictConfig) -> Tuple[DataLoader, DataLoader]:
-    data_dir = Path(data_cfg.data_path)
-    batch_size = int(data_cfg.batch_size)
-    num_workers = int(data_cfg.num_workers)
+    if data_cfg is None:
+        data_dir = Path("./src/ml_core/data/pcam")
+        batch_size = 2
+        num_workers = 0
+    else:
+        data_dir = Path(data_cfg.data.data_path)
+        batch_size = int(data_cfg.data.batch_size)
+        num_workers = int(data_cfg.data.num_workers)
 
     train_x = data_dir / "camelyonpatch_level_2_split_train_x.h5"
     train_y = data_dir / "camelyonpatch_level_2_split_train_y.h5"

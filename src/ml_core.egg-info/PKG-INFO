@@ -19,4 +19,5 @@ Requires-Dist: pre-commit
 Requires-Dist: wandb
 Requires-Dist: hydra-core
 Requires-Dist: omegaconf
+Requires-Dist: scikit-learn
 Dynamic: license-file

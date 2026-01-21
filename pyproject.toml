@@ -23,7 +23,8 @@ dependencies = [
     "pre-commit",
     "wandb",
     "hydra-core",
-    "omegaconf"
+    "omegaconf",
+    "scikit-learn"
 ]
 
 [tool.ruff]

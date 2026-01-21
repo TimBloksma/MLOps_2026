@@ -1,16 +1,7 @@
+````markdown
 # MLOps UvA Bachelor AI Course: Medical Image Classification Skeleton Code
 
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Build Status](https://github.com/yourusername/mlops_course/actions/workflows/ci.yml/badge.svg)
-![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)
-
-A repo exemplifying **MLOps best practices**: modularity, reproducibility, automation, and experiment tracking.
-
-This project implements a standardized workflow for training neural networks on medical data (PCAM/TCGA). 
-
-The idea is that you fill in the repository with the necessary functions so you can execute the ```train.py``` function. Please also fill in this ```README.md``` clearly to setup, install and run your code. 
-
-Don't forget to setup CI and linting!
+This repository contains an MLP model for patch-level classification on the PCAM dataset.
 
 ---
 
@@ -27,27 +18,31 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # 2. Install the package in "Editable" mode
 pip install -e .
 
-# 3. Install pre-commit hooks
-pre-commit install
-```
+# 3. Install extra dependencies
+pip install -r requirements.txt
+````
+### EXPERIMENT USE
 
-### 2. Verify Setup
-```bash
-pytest tests/
-```
-
-### 3. Run an Experiment
 ```bash
 python experiments/train.py --config experiments/configs/train_config.yaml
 ```
 
+### SINGLE IMAGE
+
+Use the `singleprediction.py` script to run a prediction on a sample image using a trained checkpoint:
+
+```bash
+python experiments/singleprediction.py \
+    hydra.run.dir=. \
+    +checkpoint_file=checkpoints/champion_lr0.01_bs64_hu64-32.pt
+```
+
 ---
 
-## 📂 Project Structure
 
 ```text
 .
-├── src/ml_core/          # The Source Code (Library)
+├── src/ml_core/          # Source Code (Library)
 │   ├── data/             # Data loaders and transformations
 │   ├── models/           # PyTorch model architectures
 │   ├── solver/           # Trainer class and loops
@@ -55,11 +50,51 @@ python experiments/train.py --config experiments/configs/train_config.yaml
 ├── experiments/          # The Laboratory
 │   ├── configs/          # YAML files for hyperparameters
 │   ├── results/          # Checkpoints and logs (Auto-generated)
-│   └── train.py          # Entry point for training
+│   ├── train.py          # Entry point for training
+│   └── singleprediction.py # Run inference on a single image
 ├── scripts/              # Helper scripts (plotting, etc)
 ├── tests/                # Unit tests for QA
 ├── pyproject.toml        # Config for Tools (Ruff, Pytest)
 └── setup.py              # Package installation script
 ```
 
-<!-- Temporary change for Q7 PR & CI verification -->
+---
+
+Place the PCAM H5 files in the following folder structure:
+
+```text
+src/ml_core/data/pcam/
+├── camelyonpatch_level_2_split_train_x.h5
+├── camelyonpatch_level_2_split_train_y.h5
+├── camelyonpatch_level_2_split_valid_x.h5
+├── camelyonpatch_level_2_split_valid_y.h5
+├── camelyonpatch_level_2_split_test_x.h5
+
+```
+
+---
+
+To reproduce the best model:
+
+```bash
+python experiments/train.py \
+    --config experiments/configs/train_config.yaml
+```
+
+Expected best model checkpoint:
+
+```
+checkpoints/champion_lr0.01_bs64_hu64-32.pt
+```
+
+
+Run single-image prediction with the checkpoint:
+
+```bash
+python experiments/singleprediction.py \
+    hydra.run.dir=. \
+    +checkpoint_file=checkpoints/champion_lr0.01_bs64_hu64-32.pt
+```
+
+
+

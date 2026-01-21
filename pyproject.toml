@@ -21,6 +21,10 @@ dependencies = [
     "pytest",
     "ruff",
     "pre-commit",
+    "wandb",
+    "hydra-core",
+    "omegaconf",
+    "scikit-learn",
 ]
 
 [tool.ruff]
@@ -34,3 +38,6 @@ ignore = ["E501"] # Ignore long lines, we let the formatter handle it
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.poetry.dependencies]
+hydra-core = "^1.3.2"

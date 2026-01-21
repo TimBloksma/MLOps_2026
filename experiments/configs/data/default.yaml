@@ -1,0 +1,3 @@
+data_path: ./src/ml_core/data/pcam
+batch_size: 32
+num_workers: 2

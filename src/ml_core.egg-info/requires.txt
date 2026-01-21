@@ -12,3 +12,7 @@ pandas
 pytest
 ruff
 pre-commit
+wandb
+hydra-core
+omegaconf
+scikit-learn

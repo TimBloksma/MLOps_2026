@@ -1,60 +1,41 @@
-from __future__ import annotations
-
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, Tuple
 
-import h5py
 import numpy as np
-import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler
+from torchvision import transforms
 
 from .pcam import PCAMDataset
 
 
-def _read_labels(y_path: Path) -> np.ndarray:
-    with h5py.File(y_path, "r") as f:
-        yds = f["y"] if "y" in f else list(f.values())[0]
-        return np.array(yds[:]).reshape(-1).astype(int)
+def get_dataloaders(cfg: Dict) -> Tuple[DataLoader, DataLoader]:
+    base_path = Path(cfg["data_path"]) 
+    batch_size = cfg["batch_size"]
 
+    def create_loader(split: str, use_sampler: bool = False):
+        x_p = str(base_path / f"camelyonpatch_level_2_split_{split}_x.h5")
+        y_p = str(base_path / f"camelyonpatch_level_2_split_{split}_y.h5")
 
-def get_dataloaders(config: dict) -> Tuple[DataLoader, DataLoader]:
-    data_cfg = config.get("data", {})
-    data_dir = Path(data_cfg["data_path"])
-    batch_size = int(data_cfg.get("batch_size", 64))
-    num_workers = int(data_cfg.get("num_workers", 0))
+        # Using ToTensor handles the (C, H, W) conversion and scaling to [0, 1]
+        ds = PCAMDataset(x_p, y_p, transform=transforms.ToTensor())
 
-    train_x = data_dir / "camelyonpatch_level_2_split_train_x.h5"
-    train_y = data_dir / "camelyonpatch_level_2_split_train_y.h5"
-    valid_x = data_dir / "camelyonpatch_level_2_split_valid_x.h5"
-    valid_y = data_dir / "camelyonpatch_level_2_split_valid_y.h5"
+        sampler = None
+        if use_sampler:
+            # Flatten labels for weight calculation
+            labels = ds.y_data[:].flatten()
+            class_counts = np.bincount(labels)
+            weights = 1.0 / class_counts[labels]
+            sampler = WeightedRandomSampler(weights, len(weights))
 
-    train_ds = PCAMDataset(str(train_x), str(train_y), filter_data=False)
-    valid_ds = PCAMDataset(str(valid_x), str(valid_y), filter_data=False)
+        return DataLoader(
+            ds,
+            batch_size=cfg["batch_size"],
+            sampler=sampler,
+            num_workers=cfg.get("num_workers", 0),
+            shuffle=(sampler is None),  # Shuffle only if not using sampler
+        )
 
-    y = _read_labels(train_y)
-    class_counts = np.bincount(y, minlength=2)
-    class_weights = 1.0 / np.maximum(class_counts, 1)
-    sample_weights = class_weights[y]
+    train_loader = create_loader("train", use_sampler=True)
+    val_loader = create_loader("valid", use_sampler=False)
 
-    sampler = WeightedRandomSampler(
-        weights=torch.as_tensor(sample_weights, dtype=torch.double),
-        num_samples=len(sample_weights),
-        replacement=True,
-    )
-
-    train_loader = DataLoader(
-        train_ds,
-        batch_size=batch_size,
-        sampler=sampler,
-        num_workers=num_workers,
-        pin_memory=False,
-    )
-    valid_loader = DataLoader(
-        valid_ds,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=False,
-    )
-
-    return train_loader, valid_loader
+    return train_loader, val_loader

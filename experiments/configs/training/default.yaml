@@ -1,0 +1,10 @@
+epochs: 5
+learning_rate: 0.001
+save_dir: ./experiments/results
+gradlogger: 100
+scheduler:
+  step_size: 5
+  gamma: 0.1
+checkpoint_dir: checkpoints
+monitor_metric: f2
+mode: max

@@ -1,83 +1,41 @@
 from pathlib import Path
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple
 
 import numpy as np
-import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from torchvision import transforms
 
 from .pcam import PCAMDataset
 
 
-def get_dataloaders(data_cfg: Dict) -> Tuple[DataLoader, Optional[DataLoader]]:
-    """
-    Create Train and Validation DataLoaders using a WeightedRandomSampler.
-    Expects cfg.data from Hydra.
-    """
+def get_dataloaders(cfg: Dict) -> Tuple[DataLoader, DataLoader]:
+    base_path = Path(cfg["data_path"]) 
+    batch_size = cfg["batch_size"]
 
-    base_path = Path(data_cfg["data_path"])
-    batch_size = data_cfg["batch_size"]
-    num_workers = data_cfg.get("num_workers", 0)
+    def create_loader(split: str, use_sampler: bool = False):
+        x_p = str(base_path / f"camelyonpatch_level_2_split_{split}_x.h5")
+        y_p = str(base_path / f"camelyonpatch_level_2_split_{split}_y.h5")
 
-    transform = transforms.ToTensor()
+        # Using ToTensor handles the (C, H, W) conversion and scaling to [0, 1]
+        ds = PCAMDataset(x_p, y_p, transform=transforms.ToTensor())
 
-    # --------------------
-    # TRAIN DATASET
-    # --------------------
-    train_dataset = PCAMDataset(
-        x_path=str(base_path / "camelyonpatch_level_2_split_train_x.h5"),
-        y_path=str(base_path / "camelyonpatch_level_2_split_train_y.h5"),
-        transform=transform,
-        filter_data=False,
-    )
+        sampler = None
+        if use_sampler:
+            # Flatten labels for weight calculation
+            labels = ds.y_data[:].flatten()
+            class_counts = np.bincount(labels)
+            weights = 1.0 / class_counts[labels]
+            sampler = WeightedRandomSampler(weights, len(weights))
 
-    labels = torch.tensor(
-        [train_dataset[i][1].item() for i in range(len(train_dataset))]
-    )
-
-    class_counts = torch.bincount(labels)
-    class_counts = torch.clamp(class_counts, min=1)
-
-    class_weights = 1.0 / class_counts.float()
-    sample_weights = class_weights[labels]
-
-    sampler = WeightedRandomSampler(
-        weights=sample_weights,
-        num_samples=len(sample_weights),
-        replacement=True,
-    )
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        sampler=sampler,
-        num_workers=num_workers,
-        pin_memory=True,
-    )
-
-    # --------------------
-    # VALIDATION DATASET
-    # --------------------
-    val_loader = None
-    val_x = base_path / "camelyonpatch_level_2_split_valid_x.h5"
-    val_y = base_path / "camelyonpatch_level_2_split_valid_y.h5"
-
-    if val_x.exists() and val_y.exists():
-        val_dataset = PCAMDataset(
-            x_path=str(val_x),
-            y_path=str(val_y),
-            transform=transform,
-            filter_data=False,
+        return DataLoader(
+            ds,
+            batch_size=cfg["batch_size"],
+            sampler=sampler,
+            num_workers=cfg.get("num_workers", 0),
+            shuffle=(sampler is None),  # Shuffle only if not using sampler
         )
 
-        val_loader = DataLoader(
-            val_dataset,
-            batch_size=batch_size,
-            shuffle=False,
-            num_workers=num_workers,
-            pin_memory=True,
-        )
-
-    print("[DEBUG] Train class counts:", class_counts.tolist())
+    train_loader = create_loader("train", use_sampler=True)
+    val_loader = create_loader("valid", use_sampler=False)
 
     return train_loader, val_loader

@@ -9,6 +9,7 @@ src/ml_core.egg-info/requires.txt
 src/ml_core.egg-info/top_level.txt
 src/ml_core/data/__init__.py
 src/ml_core/data/loader.py
+src/ml_core/data/loader_test.py
 src/ml_core/data/pcam.py
 src/ml_core/models/__init__.py
 src/ml_core/models/mlp.py

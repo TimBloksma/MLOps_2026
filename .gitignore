@@ -4,3 +4,7 @@ wandb/
 checkpoints/
 experiments/trainextra.py
 multirun/
+.hydra/
+eval_runs/
+src/ml_core/data/__pycache__/loader_test.cpython-313.pyc
+testmodel.log

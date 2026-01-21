@@ -24,7 +24,7 @@ dependencies = [
     "wandb",
     "hydra-core",
     "omegaconf",
-    "scikit-learn"
+    "scikit-learn",
 ]
 
 [tool.ruff]
